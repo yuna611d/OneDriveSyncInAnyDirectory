@@ -16,6 +16,7 @@ var clientID string
 var clientSecret string
 
 func main() {
+
 	// Build authURL
 	flag.Parse()
 	args := flag.Args()
