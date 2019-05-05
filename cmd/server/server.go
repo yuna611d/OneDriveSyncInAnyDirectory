@@ -3,11 +3,20 @@ package server
 import (
 	"fmt"
 	"net/http"
+
 	// TODO tentative
+	"../api"
+	"../models"
 )
 
-func Run(clientID string) {
-	authURL := getAuthRequestURI(clientID)
+var _authInfo models.AuthInfo
+
+func SetAuthInfo(authInfo models.AuthInfo) {
+	_authInfo = authInfo
+}
+
+func Run() {
+	authURL := getAuthRequestURI()
 	fmt.Printf("authURL is %s \n", authURL)
 
 	// Http Server
@@ -24,17 +33,17 @@ func Run(clientID string) {
 			// Auth Code
 			queryMap := r.URL.Query()
 			code := queryMap.Get("code")
-
 			// TODO work in 2nd times?
 			// TODO Test for check code
 			fmt.Printf("Acquired code is %s \n", code)
+			_authInfo.Code = code
 
 			// Get Access Token
 			if code != "" {
-				responseToken := api.requestFetchAccessToken(code)
 
-				fmt.Printf("responseToken => %s  \n", responseToken)
-				onedriveItems := api.getOneDriveRootDir(responseToken.AccessToken)
+				api.SetAuthInfo(_authInfo)
+				api.RequestFetchAccessToken()
+				onedriveItems := api.GetOneDriveRootDir()
 				fmt.Printf("onedriveItem => %s", onedriveItems)
 
 			}
@@ -49,11 +58,11 @@ func Run(clientID string) {
 
 }
 
-func getAuthRequestURI(clientID string) string {
+func getAuthRequestURI() string {
 	// TODO These query parameteres should be configured from outside
 	baseURL := "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
 	queryMap := map[string]string{
-		"client_id":     clientID,
+		"client_id":     _authInfo.ClientID,
 		"scope":         "files.readwrite offline_access",
 		"response_type": "code",
 		"redirect_uri":  "http://localhost:5001/",

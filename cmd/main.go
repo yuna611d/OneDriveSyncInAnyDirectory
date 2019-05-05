@@ -6,6 +6,7 @@ import (
 	"os"
 
 	// TODO Tentative
+	"./models"
 	"./server"
 )
 
@@ -29,8 +30,11 @@ func main() {
 	clientSecret = args[1]
 	fmt.Printf("client_id is %s \n", clientID)
 	fmt.Printf("client_secret is %s \n", clientSecret)
+	// Instansiate auth information
+	authInfo := models.AuthInfo{ClientID: clientID, ClientSecret: clientSecret}
 
 	// Run Server to get access code
-	server.Run(clientID)
+	server.SetAuthInfo(authInfo)
+	server.Run()
 
 }
