@@ -29,19 +29,20 @@ func GetInstance() *authInfo {
 	return instance
 }
 
-func (self *authInfo)authFlowURL() map[string] string {
+
+func (self *authInfo) getBaseEndPoint() string {
 	scheme := "https://"
 	host := "login.microsoftonline.com"
-	authorizePath := "/oauth2/v2.0/authorize"
-	tokenPath := "/oauth2/v2.0/token"
-
-	AuthURL := scheme + host + "/" + self.TenantID + authorizePath
-	TokenURL := scheme + host + "/" + self.TenantID + tokenPath
-
-	return map[string] string{
-		"auth": AuthURL,
-		"token": TokenURL,
-	} 
+	baseEndPoint :="/oauth2/v2.0"
+	return scheme + host + "/" + self.TenantID + baseEndPoint
+}
+func (self *authInfo) GetAuthEndPoint() string {
+	baseEndPoint := self.getBaseEndPoint()
+	return baseEndPoint + "/authorize"
+}
+func (self *authInfo) GetTokenEndPoint() string {
+	baseEndPoint := self.getBaseEndPoint()
+	return baseEndPoint + "/token"	
 }
 
 
@@ -51,12 +52,9 @@ func (self *authInfo)authFlowURL() map[string] string {
 
 
 func (self *authInfo) GetAuthCodeRequestURI() string {
-	// TODO These query parameteres should be configured from outside
-	scheme:="https://"
-	host:="login.microsoftonline.com"
-	path:=	"/oauth2/v2.0/authorize"
 
-	baseURL :=  scheme + host + "/" +self.TenantID + path 
+	endPoint :=  self.GetAuthEndPoint()
+
 	queryMap := map[string]string{
 		"client_id":     self.ClientID,
 		"scope":         "files.readwrite offline_access",
@@ -65,7 +63,7 @@ func (self *authInfo) GetAuthCodeRequestURI() string {
 	}
 
 	isInitialParameter := true
-	authURL := baseURL
+	authURL := endPoint
 	for key, value := range queryMap {
 		operand := ""
 		if isInitialParameter {
@@ -81,11 +79,8 @@ func (self *authInfo) GetAuthCodeRequestURI() string {
 }
 
 func (self *authInfo) RequestAccessToken() {
-	scheme:="https://"
-	host:="login.microsoftonline.com"
-	path:=	"/oauth2/v2.0/token"
 
-	tokenURL := scheme + host +  "/" +self.TenantID + path
+	endPoint := self.GetTokenEndPoint()
 
 	// Build Body parameters
 	bodyParameters := map[string]string{
@@ -102,7 +97,7 @@ func (self *authInfo) RequestAccessToken() {
 	fmt.Printf("Post Body values %s \n", val)
 
 	client := http.Client{}
-	req, err := http.NewRequest("POST", tokenURL, strings.NewReader(val.Encode()))
+	req, err := http.NewRequest("POST", endPoint, strings.NewReader(val.Encode()))
 	if err != nil {
 		// TODO error handle
 		// fmt.Printf("err => %w", err.Error)
@@ -125,10 +120,10 @@ func (self *authInfo) RequestAccessToken() {
 	self.AccessToken = responseToken.AccessToken
 	self.RefreshToken = responseToken.RefreshToken
 	fmt.Printf("responseToken => %s  \n", responseToken)
-	fmt.Printf("TokenType => %s  \n", responseToken.TokenType)
-	fmt.Printf("Scope => %s  \n", responseToken.Scope)
-	fmt.Printf("accessToken => %s  \n", responseToken.AccessToken)
-	fmt.Printf("RefreshToken => %s  \n", responseToken.RefreshToken)
+	fmt.Printf("TokenType     => %s  \n", responseToken.TokenType)
+	fmt.Printf("Scope         => %s  \n", responseToken.Scope)
+	fmt.Printf("accessToken   => %s  \n", responseToken.AccessToken)
+	fmt.Printf("RefreshToken  => %s  \n", responseToken.RefreshToken)
 
 	// return responseToken
 }
