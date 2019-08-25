@@ -6,28 +6,24 @@ import (
 
 	// TODO tentative
 	"../api"
-	"../models"
+	"../auth"
 )
 
-var _authInfo models.AuthInfo
-
-func SetAuthInfo(authInfo models.AuthInfo) {
-	_authInfo = authInfo
-}
-
 func Run() {
-	authURL := getAuthRequestURI()
-	fmt.Printf("authURL is %s \n", authURL)
 
 	// Http Server
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
+		// See auth flow https://docs.microsoft.com/ja-jp/onedrive/developer/media/authorization_code_flow.png?view=odsp-graph-online
+
 		// TODO Tentative
 		if r.URL.Query().Get("code") == "" {
-			link := "<a href=\"" + authURL + "\">Auth Request</a>"
+			link := "<a href=\"" + auth.GetInstance().GetAuthCodeRequestURI() + "\">Auth Request</a>"
 			fmt.Fprintf(w, link)
 		} else {
-			// TODO message should be controller from outside
+			// Redirected from Authorization end point
+
+			// TODO message should be controlled from outside
 			fmt.Fprintln(w, "Authorized")
 
 			// Auth Code
@@ -35,14 +31,14 @@ func Run() {
 			code := queryMap.Get("code")
 			// TODO work in 2nd times?
 			// TODO Test for check code
-			fmt.Printf("Acquired code is %s \n", code)
-			_authInfo.Code = code
+			fmt.Printf("Acquired auth code is %s \n", code)
+			auth.GetInstance().Code = code
 
 			// Get Access Token
 			if code != "" {
 
-				api.SetAuthInfo(_authInfo)
-				api.RequestFetchAccessToken()
+				auth.GetInstance().RequestAccessToken()
+
 				onedriveItems := api.GetOneDriveRootDir()
 				fmt.Printf("onedriveItem => %s", onedriveItems)
 
@@ -56,30 +52,4 @@ func Run() {
 	// TODO This should be https
 	http.ListenAndServe(port, nil)
 
-}
-
-func getAuthRequestURI() string {
-	// TODO These query parameteres should be configured from outside
-	baseURL := "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
-	queryMap := map[string]string{
-		"client_id":     _authInfo.ClientID,
-		"scope":         "files.readwrite offline_access",
-		"response_type": "code",
-		"redirect_uri":  "http://localhost:5001/",
-	}
-
-	isInitialParameter := true
-	authURL := baseURL
-	for key, value := range queryMap {
-		operand := ""
-		if isInitialParameter {
-			operand = "?"
-			isInitialParameter = !isInitialParameter
-		} else {
-			operand = "&"
-		}
-		authURL += operand + key + "=" + value
-	}
-
-	return authURL
 }
