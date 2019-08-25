@@ -61,18 +61,15 @@ func GetOneDriveRootDir() models.OneDriveDriveItems {
 	}
 	defer res.Body.Close()
 
-	body, error := ioutil.ReadAll(res.Body)
-	if error != nil {
-		fmt.Println("err " )		
-	}
-	fmt.Println("[body] " + string(body))
-
 
 	target := models.OneDriveDriveItems{}
 	getJSON(res.Body, &target)
+
 	return target
 }
 
 func getJSON(reader io.Reader, target interface{}) {
-	json.NewDecoder(reader).Decode(target)
+	if err:= json.NewDecoder(reader).Decode(target); err != nil {
+		fmt.Printf("decode error: %s  \n", err)
+	}
 }
