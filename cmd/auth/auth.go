@@ -57,7 +57,8 @@ func (self *authInfo) GetAuthCodeRequestURI() string {
 
 	queryMap := map[string]string{
 		"client_id":     self.ClientID,
-		"scope":         "files.readwrite offline_access",
+		// "scope":         "files.readwrite offline_access",
+		"scope":         "Files.ReadWrite.All offline_access",
 		"response_type": "code",
 		"redirect_uri":  "http://localhost:5001/",
 	}
@@ -75,6 +76,8 @@ func (self *authInfo) GetAuthCodeRequestURI() string {
 		authURL += operand + key + "=" + value
 	}
 
+	fmt.Printf("Requested AuthURL is %s \n", authURL)
+
 	return authURL
 }
 
@@ -87,6 +90,7 @@ func (self *authInfo) RequestAccessToken() {
 		"client_id":     self.ClientID,
 		"client_secret": self.ClientSecret,
 		"code":          self.Code,
+		"scope":         "Files.ReadWrite.All offline_access",
 		"grant_type":    "authorization_code",
 		"redirect_uri":  "http://localhost:5001/",
 	}
@@ -94,13 +98,14 @@ func (self *authInfo) RequestAccessToken() {
 	for key, value := range bodyParameters {
 		val.Add(key, value)
 	}
+	fmt.Printf("Requested Token EndPont is %s \n", endPoint)
 	fmt.Printf("Post Body values %s \n", val)
 
 	client := http.Client{}
 	req, err := http.NewRequest("POST", endPoint, strings.NewReader(val.Encode()))
 	if err != nil {
 		// TODO error handle
-		// fmt.Printf("err => %w", err.Error)
+		// fmt.Printf("err => %", err.Error())
 		fmt.Printf("request for access token is failed \n")
 		os.Exit(1)
 	}
@@ -114,16 +119,16 @@ func (self *authInfo) RequestAccessToken() {
 	defer res.Body.Close()
 
 	responseToken := models.ResponseToken{}
-	json.NewDecoder(res.Body).Decode(&responseToken)
+	if err := json.NewDecoder(res.Body).Decode(&responseToken); err != nil {
+		fmt.Printf("decode error of responseToken: %s  \n", err)
+	}
 	// getJSON(res.Body, &responseToken)
 
 	self.AccessToken = responseToken.AccessToken
 	self.RefreshToken = responseToken.RefreshToken
-	fmt.Printf("responseToken => %s  \n", responseToken)
-	fmt.Printf("TokenType     => %s  \n", responseToken.TokenType)
-	fmt.Printf("Scope         => %s  \n", responseToken.Scope)
-	fmt.Printf("accessToken   => %s  \n", responseToken.AccessToken)
-	fmt.Printf("RefreshToken  => %s  \n", responseToken.RefreshToken)
-
-	// return responseToken
+	fmt.Printf(" ResponseToken => %s  \n", responseToken)
+	fmt.Printf("  TokenType     => %s  \n", responseToken.TokenType)
+	fmt.Printf("  Scope         => %s  \n", responseToken.Scope)
+	fmt.Printf("  AccessToken   => %s  \n", responseToken.AccessToken)
+	fmt.Printf("  RefreshToken  => %s  \n", responseToken.RefreshToken)
 }

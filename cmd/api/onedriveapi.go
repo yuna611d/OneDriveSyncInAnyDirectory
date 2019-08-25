@@ -21,7 +21,6 @@ func callOneDriveAPI(apiURI string) io.ReadCloser {
 		fmt.Printf("request for api is failed \n")
 		os.Exit(1)
 	}
-	// req.Header.Set("Authorization", "bearer "+_authInfo.AccessToken)
 	req.Header.Set("Authorization", "bearer "+ auth.GetInstance().AccessToken)
 	res, err := client.Do(req)
 	if err != nil {

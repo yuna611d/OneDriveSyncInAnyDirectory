@@ -38,7 +38,7 @@ func Run() {
 			if code != "" {
 
 				auth.GetInstance().RequestAccessToken()
-
+				
 				onedriveItems := api.GetOneDriveRootDir()
 				fmt.Printf("onedriveItem => %s", onedriveItems)
 

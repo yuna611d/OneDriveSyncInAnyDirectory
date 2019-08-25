@@ -25,6 +25,7 @@ func main() {
 	tenantID := args[0]
 	clientID := args[1]
 	clientSecret := args[2]
+	fmt.Printf("tenant_id is %s \n", tenantID)
 	fmt.Printf("client_id is %s \n", clientID)
 	fmt.Printf("client_secret is %s \n", clientSecret)
 	// Instansiate auth information
