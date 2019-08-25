@@ -12,12 +12,6 @@ import (
 	"../auth"
 )
 
-// var _authInfo models.AuthInfo
-
-// func SetAuthInfo(authInfo models.AuthInfo) {
-// 	_authInfo = authInfo
-// }
-
 // TODO is it possible to use generics?
 func callOneDriveAPI(apiURI string) io.ReadCloser {
 	client := http.Client{}

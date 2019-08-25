@@ -12,6 +12,7 @@ import (
 )
 
 type authInfo struct {
+	TenantID     string
 	ClientID     string
 	ClientSecret string
 	Code         string
@@ -28,9 +29,34 @@ func GetInstance() *authInfo {
 	return instance
 }
 
+func (self *authInfo)authFlowURL() map[string] string {
+	scheme := "https://"
+	host := "login.microsoftonline.com"
+	authorizePath := "/oauth2/v2.0/authorize"
+	tokenPath := "/oauth2/v2.0/token"
+
+	AuthURL := scheme + host + "/" + self.TenantID + authorizePath
+	TokenURL := scheme + host + "/" + self.TenantID + tokenPath
+
+	return map[string] string{
+		"auth": AuthURL,
+		"token": TokenURL,
+	} 
+}
+
+
+
+// Auth Flow
+// https://docs.microsoft.com/ja-JP/azure/active-directory/develop/v2-oauth2-auth-code-flow
+
+
 func (self *authInfo) GetAuthCodeRequestURI() string {
 	// TODO These query parameteres should be configured from outside
-	baseURL := "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+	scheme:="https://"
+	host:="login.microsoftonline.com"
+	path:=	"/oauth2/v2.0/authorize"
+
+	baseURL :=  scheme + host + "/" +self.TenantID + path 
 	queryMap := map[string]string{
 		"client_id":     self.ClientID,
 		"scope":         "files.readwrite offline_access",
@@ -55,7 +81,11 @@ func (self *authInfo) GetAuthCodeRequestURI() string {
 }
 
 func (self *authInfo) RequestAccessToken() {
-	tokenURL := "https://login.live.com/oauth20_token.srf"
+	scheme:="https://"
+	host:="login.microsoftonline.com"
+	path:=	"/oauth2/v2.0/token"
+
+	tokenURL := scheme + host +  "/" +self.TenantID + path
 
 	// Build Body parameters
 	bodyParameters := map[string]string{
