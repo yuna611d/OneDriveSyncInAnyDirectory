@@ -63,7 +63,25 @@ func GetOneDriveRootDir() models.OneDriveDriveItems {
 
 
 	target := models.OneDriveDriveItems{}
+	// TODO tentative
+	// var d struct {
+	// 	Value []struct {
+	// 		Name string `json:"name"`
+	// 		Size int    `json:"size,omitempty"`
+	// 		File struct {
+	// 		} `json:"file,omitempty"`
+	// 		Folder struct {
+	// 			ChildCount int `json:"childCount"`
+	// 		} `json:"folder,omitempty"`
+	// 	} `json:"value"`
+	// 	// OdataNextLink string `json:"@odata.nextLink"`
+	// }
+	// getJSON(res.Body, &d)
+	// fmt.Printf("onedriveItem => %s", d)
+
 	getJSON(res.Body, &target)
+
+
 
 	return target
 }
