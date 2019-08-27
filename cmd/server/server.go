@@ -38,9 +38,17 @@ func Run() {
 			if code != "" {
 
 				auth.GetInstance().RequestAccessToken()
-				
+
 				onedriveItems := api.GetOneDriveRootDir()
-				fmt.Printf("onedriveItem => %s", onedriveItems)
+				fmt.Printf("onedriveItem => %s\n", onedriveItems)
+				for _, i := range onedriveItems.Value {
+					fmt.Printf("OneDriveItemID      => %s\n", i.ID)
+					fmt.Printf(" OneDriveItemName   => %s\n", i.Name)
+					fmt.Printf(" OneDriveItemWebURL => %s\n", i.WebURL)
+					fmt.Printf(" OneDriveItemFolder => %s\n", i.Folder)
+					fmt.Printf(" OneDriveItemFile   => %s\n", i.File)
+
+				}
 
 			}
 		}
